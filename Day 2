@@ -1,0 +1,60 @@
+利用numpy实现逻辑回归
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets.samples_generator import make_classification
+
+
+def sigmoid(x):
+    z = 1/(1 + np.exp(-x))
+    return z
+
+
+def initiate_params(dims):
+    w = np.zeros((dims, 1))
+    b = 0
+    return w, b
+
+
+def sigmoid_loss(X, y, w, b):
+    num_train = X.shape[0]
+    num_feature = X.shape[1]
+
+    z = sigmoid(np.dot(X, w)+b)
+    # loss = -y * (ln(z)) - (1-y) * (ln(1-z))
+    cost = -1/num_train * np.sum(y*np.log(z)) + (1-y)*np.log(1-z)
+    # 算出偏导数
+    # dw = X * (z-y)/num_train
+    dw = np.dot(X.T, (z-y))/num_train
+    db = np.sum(z - y)/num_train
+
+    cost = np.squeeze(cost)
+
+    return z, cost, dw, db
+
+
+def sigmoid_train(X, y, learning_rate, epoches):
+    w, b = initiate_params(X.shape[1])
+    cost_list = []
+
+    for i in epoches:
+        z, cost, dw, db = sigmoid_loss(X, y, w, b)
+
+        # 更新权重
+        w += -learning_rate * dw
+        b += -learning_rate * db
+
+        if i % 100 == 0:
+            cost_list.append(cost)
+            print("The %d epoch, loss is %f" % (i, cost))
+
+        params = {
+            'w': w,
+            'b': b
+        }
+        grads = {
+            'dw': dw,
+            'db': db
+        }
+    return cost_list, params, grads
